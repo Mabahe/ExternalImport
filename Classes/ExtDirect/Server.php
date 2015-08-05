@@ -50,7 +50,7 @@ class Tx_ExternalImport_ExtDirect_Server {
 		$this->configurationRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('Tx_ExternalImport_Domain_Repository_ConfigurationRepository');
 			// Get an instance of the scheduler (if available)
 		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('scheduler')) {
-			$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_scheduler');
+			$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Scheduler\\Scheduler');
 		}
 	}
 

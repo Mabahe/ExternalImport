@@ -60,7 +60,7 @@ class Tx_ExternalImport_Domain_Repository_SchedulerRepository implements \TYPO3\
 	protected $dateFormat;
 
 	public function __construct() {
-		$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_scheduler');
+		$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Scheduler\\Scheduler');
 		$allTasks = $this->scheduler->fetchTasksWithCondition('', TRUE);
 		/** @var $aTaskObject tx_scheduler_Task */
 		foreach ($allTasks as $aTaskObject) {

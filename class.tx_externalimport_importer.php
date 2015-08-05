@@ -70,8 +70,7 @@ class tx_externalimport_importer {
 			// Make sure we have a language object
 			// If initialised, use existing, if not, initialise it
 		if (!isset($GLOBALS['LANG'])) {
-			require_once(PATH_typo3 . 'sysext/lang/lang.php');
-			$GLOBALS['LANG'] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('language');
+			$GLOBALS['LANG'] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Lang\\LanguageService');
 			$GLOBALS['LANG']->init($GLOBALS['BE_USER']->uc['lang']);
 		}
 		$GLOBALS['LANG']->includeLLFile('EXT:' . $this->extKey . '/locallang.xml');
