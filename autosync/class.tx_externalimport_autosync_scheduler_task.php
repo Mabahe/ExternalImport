@@ -32,7 +32,7 @@
  *
  * $Id$
  */
-class tx_externalimport_autosync_scheduler_Task extends tx_scheduler_Task {
+class tx_externalimport_autosync_scheduler_Task extends \TYPO3\CMS\Scheduler\Task\AbstractTask {
 	/**
 	 * @var	string	Name of the table to synchronize ("all" for all tables)
 	 */
@@ -54,7 +54,7 @@ class tx_externalimport_autosync_scheduler_Task extends tx_scheduler_Task {
 
 			// Instantiate the import object and call appropriate method depending on command
 			/** @var $importer tx_externalimport_importer */
-		$importer = t3lib_div::makeInstance('tx_externalimport_importer');
+		$importer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_importer');
 			// Get the extension's configuration from the importer object
 		$extensionConfiguration = $importer->getExtensionConfiguration();
 			// Synchronize all tables

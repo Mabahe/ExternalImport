@@ -40,7 +40,7 @@ class tx_externalimport_importer_Test extends tx_phpunit_testcase {
 	protected $importer;
 
 	public function setUp() {
-		$this->importer = t3lib_div::makeInstance('tx_externalimport_importer');
+		$this->importer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_importer');
 	}
 
 	/**

@@ -61,7 +61,7 @@ class Tx_ExternalImport_Domain_Repository_ConfigurationRepository {
 	 * @return array The relevant TCA configuration
 	 */
 	public function findColumnsByTableAndIndex($table, $index) {
-		t3lib_div::loadTCA($table);
+		\TYPO3\CMS\Core\Utility\GeneralUtility::loadTCA($table);
 		if (isset($GLOBALS['TCA'][$table]['columns'])) {
 			$columns = array();
 			$columnsConfiguration = $GLOBALS['TCA'][$table]['columns'];
@@ -89,9 +89,9 @@ class Tx_ExternalImport_Domain_Repository_ConfigurationRepository {
 
 			// Get a list of all external import Scheduler tasks, if Scheduler is active
 		$tasks = array();
-		if (t3lib_extMgm::isLoaded('scheduler')) {
+		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('scheduler')) {
 				/** @var $schedulerRepository Tx_ExternalImport_Domain_Repository_SchedulerRepository */
-			$schedulerRepository = t3lib_div::makeInstance('Tx_ExternalImport_Domain_Repository_SchedulerRepository');
+			$schedulerRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('Tx_ExternalImport_Domain_Repository_SchedulerRepository');
 			$tasks = $schedulerRepository->fetchAllTasks();
 		}
 
@@ -130,7 +130,7 @@ class Tx_ExternalImport_Domain_Repository_ConfigurationRepository {
 								'id' => $tableName . '-' . $index,
 								'table' => $tableName,
 								'tableName' => $GLOBALS['LANG']->sL($sections['ctrl']['title']) . ' (' . $tableName . ')',
-								'icon' => t3lib_iconWorks::getSpriteIconForRecord($tableName, array()),
+								'icon' => \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord($tableName, array()),
 								'index' => $index,
 								'columnIndex' => $columnIndex,
 								'priority' => intval($priority),

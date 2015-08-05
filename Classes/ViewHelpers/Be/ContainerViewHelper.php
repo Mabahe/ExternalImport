@@ -34,7 +34,7 @@
  *
  * $Id$
  */
-class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends Tx_Fluid_ViewHelpers_Be_ContainerViewHelper {
+class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends \TYPO3\CMS\Fluid\ViewHelpers\Be\ContainerViewHelper {
 
 	/**
 	 * Render start page with template.php and pageTitle
@@ -55,7 +55,7 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends Tx_Fluid_View
 	 * @param string $view Name of the current view ("sync" or "nosync")
 	 * @return string
 	 * @see template
-	 * @see t3lib_PageRenderer
+	 * @see \TYPO3\CMS\Core\Page\PageRenderer
 	 */
 	public function render($pageTitle = '', $enableJumpToUrl = TRUE, $enableClickMenu = TRUE, $loadPrototype = TRUE, $loadScriptaculous = FALSE, $scriptaculousModule = '', $loadExtJs = FALSE, $loadExtJsTheme = TRUE, $extJsAdapter = '', $enableExtJsDebug = FALSE, $addCssFile = NULL, $addJsFile = NULL, $globalWriteAccess = 'none', $view = 'sync') {
 		$extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['external_import']);
@@ -87,7 +87,7 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends Tx_Fluid_View
 			'external_import',
 			array(
 				'timelimit' => $timeLimit,
-				'hasScheduler' => t3lib_extMgm::isLoaded('scheduler', FALSE),
+				'hasScheduler' => \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('scheduler', FALSE),
 				'globalWriteAccess' => $globalWriteAccess,
 				'dateFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['ddmmyy'],
 				'timeFormat' => $GLOBALS['TYPO3_CONF_VARS']['SYS']['hhmm'],
@@ -96,7 +96,7 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends Tx_Fluid_View
 		);
 		// Load JS-powered flash messages library
 		if ($isTypo3Version62OrMore) {
-			$notificationLibraryPath = t3lib_extMgm::extRelPath('backend') . 'Resources/Public/JavaScript/notifications.js';
+			$notificationLibraryPath = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extRelPath('backend') . 'Resources/Public/JavaScript/notifications.js';
 		} else {
 			$notificationLibraryPath = $doc->backPath . '../t3lib/js/extjs/notifications.js';
 		}

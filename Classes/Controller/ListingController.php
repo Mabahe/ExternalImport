@@ -34,7 +34,7 @@
  *
  * $Id$
  */
-class Tx_ExternalImport_Controller_ListingController extends Tx_Extbase_MVC_Controller_ActionController {
+class Tx_ExternalImport_Controller_ListingController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController {
 	/**
 	 * @var Tx_ExternalImport_Domain_Repository_ConfigurationRepository
 	 */
@@ -61,18 +61,18 @@ class Tx_ExternalImport_Controller_ListingController extends Tx_Extbase_MVC_Cont
 	 * Override this method to solve assign variables common for all actions
 	 * or prepare the view in another way before the action is called.
 	 *
-	 * @param Tx_Extbase_MVC_View_ViewInterface $view The view to be initialized
+	 * @param \TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view The view to be initialized
 	 * @return void
 	 * @api
 	 */
-	protected function initializeView(Tx_Extbase_MVC_View_ViewInterface $view) {
+	protected function initializeView(\TYPO3\CMS\Extbase\Mvc\View\ViewInterface $view) {
 		// Evaluate write access on all tables
 		$globalWriteAccess = $this->configurationRepository->findGlobalWriteAccess();
 		$view->assign('globalWriteAccess', $globalWriteAccess);
 		$view->assign('view', strtolower($this->request->getControllerActionName()));
 			// If TYPO3 version is lower then 4.7, use the old icon name for refresh
 			// (this is necessary due to the way the Fluid BE View Helper for icon buttons was coded)
-		if (t3lib_utility_VersionNumber::convertVersionNumberToInteger(TYPO3_branch) < '4007000') {
+		if (\TYPO3\CMS\Core\Utility\VersionNumberUtility::convertVersionNumberToInteger(TYPO3_branch) < '4007000') {
 			$this->refreshIcon = 'refresh_n';
 		}
 		$view->assign('refresh_icon', $this->refreshIcon);

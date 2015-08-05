@@ -18,7 +18,7 @@ instance of class :code:`tx_externalimport_importer` and a single call.
 
 .. code-block:: php
 
-	$importer = t3lib_div::makeInstance('tx_externalimport_importer');
+	$importer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_importer');
 	$importer->importData($table, $index, $rawData);
 
 

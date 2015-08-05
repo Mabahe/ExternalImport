@@ -31,7 +31,7 @@
  *
  * $Id$
  */
-class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements tx_scheduler_AdditionalFieldProvider {
+class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements \TYPO3\CMS\Scheduler\AdditionalFieldProviderInterface {
 	/**
 	 * Name of the additional field
 	 */
@@ -43,7 +43,7 @@ class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements tx
 	 *
 	 * @param	array					$taskInfo: reference to the array containing the info used in the add/edit form
 	 * @param	object					$task: when editing, reference to the current task object. Null when adding.
-	 * @param	tx_scheduler_Module		$parentObject: reference to the calling object (Scheduler's BE module)
+	 * @param	\TYPO3\CMS\Scheduler\Controller\SchedulerModuleController		$parentObject: reference to the calling object (Scheduler's BE module)
 	 * @return	array					Array containg all the information pertaining to the additional fields
 	 *									The array is multidimensional, keyed to the task class name and each field's id
 	 *									For each field it provides an associative sub-array with the following:
@@ -52,7 +52,7 @@ class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements tx
 	 *										['cshKey']		=> The CSH key for the field
 	 *										['cshLabel']	=> The code of the CSH label
 	 */
-	public function getAdditionalFields(array &$taskInfo, $task, tx_scheduler_Module $parentObject) {
+	public function getAdditionalFields(array &$taskInfo, $task, \TYPO3\CMS\Scheduler\Controller\SchedulerModuleController $parentObject) {
 
 			// Initialize extra field value
 		if (empty($taskInfo[self::$fieldName])) {
@@ -108,10 +108,10 @@ class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements tx
 	 * If the task class is not relevant, the method is expected to return true
 	 *
 	 * @param	array					$submittedData: reference to the array containing the data submitted by the user
-	 * @param	tx_scheduler_Module		$parentObject: reference to the calling object (Scheduler's BE module)
+	 * @param	\TYPO3\CMS\Scheduler\Controller\SchedulerModuleController		$parentObject: reference to the calling object (Scheduler's BE module)
 	 * @return	boolean					True if validation was ok (or selected class is not relevant), false otherwise
 	 */
-	public function validateAdditionalFields(array &$submittedData, tx_scheduler_Module $parentObject) {
+	public function validateAdditionalFields(array &$submittedData, \TYPO3\CMS\Scheduler\Controller\SchedulerModuleController $parentObject) {
 			// Since only a valid value could be chosen from the selected, always return true
 		return TRUE;
 	}
@@ -121,10 +121,10 @@ class tx_externalimport_autosync_scheduler_AdditionalFieldProvider implements tx
 	 * if the task class matches
 	 *
 	 * @param	array				$submittedData: array containing the data submitted by the user
-	 * @param	tx_scheduler_Task	$task: reference to the current task object
+	 * @param	\TYPO3\CMS\Scheduler\Task\AbstractTask	$task: reference to the current task object
 	 * @return	void
 	 */
-	public function saveAdditionalFields(array $submittedData, tx_scheduler_Task $task) {
+	public function saveAdditionalFields(array $submittedData, \TYPO3\CMS\Scheduler\Task\AbstractTask $task) {
 		if ($submittedData[self::$fieldName] == 'all') {
 			$task->table = 'all';
 			$task->index = 0;

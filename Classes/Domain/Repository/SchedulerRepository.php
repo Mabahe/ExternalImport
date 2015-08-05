@@ -34,7 +34,7 @@
  *
  * $Id$
  */
-class Tx_ExternalImport_Domain_Repository_SchedulerRepository implements t3lib_Singleton {
+class Tx_ExternalImport_Domain_Repository_SchedulerRepository implements \TYPO3\CMS\Core\SingletonInterface {
 	/**
 	 * @var	string	Name of the related task class
 	 */
@@ -60,7 +60,7 @@ class Tx_ExternalImport_Domain_Repository_SchedulerRepository implements t3lib_S
 	protected $dateFormat;
 
 	public function __construct() {
-		$this->scheduler = t3lib_div::makeInstance('tx_scheduler');
+		$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_scheduler');
 		$allTasks = $this->scheduler->fetchTasksWithCondition('', TRUE);
 		/** @var $aTaskObject tx_scheduler_Task */
 		foreach ($allTasks as $aTaskObject) {
@@ -140,7 +140,7 @@ class Tx_ExternalImport_Domain_Repository_SchedulerRepository implements t3lib_S
 		if (empty($taskData['uid'])) {
 				// Create a new task instance and register the execution
 				/** @var $task tx_scheduler_Task */
-			$task = t3lib_div::makeInstance(self::$taskClassName);
+			$task = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(self::$taskClassName);
 			$task->registerRecurringExecution($taskData['start'], $taskData['interval'], 0, FALSE, $taskData['croncmd']);
 				// Set the data specific to external import
 			$task->table = $taskData['sync'];

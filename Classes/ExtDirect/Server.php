@@ -47,10 +47,10 @@ class Tx_ExternalImport_ExtDirect_Server {
 			// Read the extension's configuration
 		$this->extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['external_import']);
 			// Create an instance of the configuration repository
-		$this->configurationRepository = t3lib_div::makeInstance('Tx_ExternalImport_Domain_Repository_ConfigurationRepository');
+		$this->configurationRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('Tx_ExternalImport_Domain_Repository_ConfigurationRepository');
 			// Get an instance of the scheduler (if available)
-		if (t3lib_extMgm::isLoaded('scheduler')) {
-			$this->scheduler = t3lib_div::makeInstance('tx_scheduler');
+		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('scheduler')) {
+			$this->scheduler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_scheduler');
 		}
 	}
 
@@ -93,11 +93,11 @@ class Tx_ExternalImport_ExtDirect_Server {
 				if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['external_import']['processParameters'])) {
 					// The hook needs an instance of the importer class
 					/** @var tx_externalimport_importer $importer */
-					$importer = t3lib_div::makeInstance('tx_externalimport_importer');
+					$importer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_importer');
 					$importer->setTableName($table);
 					$importer->setIndex($index);
 					foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF']['external_import']['processParameters'] as $className) {
-						$preProcessor = t3lib_div::getUserObj($className);
+						$preProcessor = \TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 						$processedParameters = $preProcessor->processParameters($externalCtrlConfiguration['parameters'], $this);
 					}
 				}
@@ -120,12 +120,12 @@ class Tx_ExternalImport_ExtDirect_Server {
 					$this->verifyCustomDataHandler($externalCtrlConfiguration['dataHandler']);
 				}
 				catch (Exception $e) {
-						/** @var $flashMessage t3lib_FlashMessage */
-					$flashMessage = t3lib_div::makeInstance(
-						't3lib_FlashMessage',
+						/** @var $flashMessage \TYPO3\CMS\Core\Messaging\FlashMessage */
+					$flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
+						'\TYPO3\CMS\Core\Messaging\FlashMessage',
 						$e->getMessage(),
 						'',
-						t3lib_FlashMessage::ERROR
+						\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR
 					);
 					$error = $flashMessage->render();
 				}
@@ -243,9 +243,9 @@ class Tx_ExternalImport_ExtDirect_Server {
 		$fullSyncTaskInformation = array();
 
 			// Find out if a Scheduler task has been registered for all tables
-		if (t3lib_extMgm::isLoaded('scheduler', FALSE)) {
+		if (\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::isLoaded('scheduler', FALSE)) {
 				/** @var $schedulerRepository Tx_ExternalImport_Domain_Repository_SchedulerRepository */
-			$schedulerRepository = t3lib_div::makeInstance('Tx_ExternalImport_Domain_Repository_SchedulerRepository');
+			$schedulerRepository = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('Tx_ExternalImport_Domain_Repository_SchedulerRepository');
 			try {
 				$task = $schedulerRepository->fetchFullSynchronizationTask();
 					// Create a fake configuration and add the task to it
@@ -269,7 +269,7 @@ class Tx_ExternalImport_ExtDirect_Server {
 	 */
 	public function launchSynchronization($table, $index) {
 			/** @var $importer tx_externalimport_importer */
-		$importer = t3lib_div::makeInstance('tx_externalimport_importer');
+		$importer = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_importer');
 
 			// Synchronize the table
 		$messages = $importer->synchronizeData($table, $index);
@@ -408,7 +408,7 @@ class Tx_ExternalImport_ExtDirect_Server {
 	protected function createTask($data) {
 			// Create a new task instance and register the execution
 			/** @var $task tx_externalimport_autosync_scheduler_Task */
-		$task = t3lib_div::makeInstance('tx_externalimport_autosync_scheduler_Task');
+		$task = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('tx_externalimport_autosync_scheduler_Task');
 		$task->registerRecurringExecution($data['start'], $data['interval'], 0, FALSE, $data['croncmd']);
 			// Set the data specific to external import
 		$task->table = $data['table'];
@@ -575,7 +575,7 @@ class Tx_ExternalImport_ExtDirect_Server {
 			// Check if the class exists
 		if (class_exists($class)) {
 				// Instantiate the custom handler
-			$dataHandler = t3lib_div::makeInstance($class);
+			$dataHandler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($class);
 				// Verify that it implements the required interface
 			if (!($dataHandler instanceof tx_externalimport_dataHandler)) {
 				throw new Exception(
@@ -602,16 +602,16 @@ class Tx_ExternalImport_ExtDirect_Server {
 	protected function getPageLink($uid) {
 		$string = '';
 		if (!empty($uid)) {
-			$page = t3lib_BEfunc::getRecord('pages', $uid);
+			$page = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecord('pages', $uid);
 				// If the page doesn't exist, the result is null, but we need rather an empty array
 			if ($page === NULL) {
 				$page = array();
 			}
-			$pageTitle = t3lib_BEfunc::getRecordTitle('pages', $page, 1);
-			$iconAltText = t3lib_BEfunc::getRecordIconAltText($page, 'pages');
+			$pageTitle = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordTitle('pages', $page, 1);
+			$iconAltText = \TYPO3\CMS\Backend\Utility\BackendUtility::getRecordIconAltText($page, 'pages');
 
 				// Create icon for record
-			$elementIcon = t3lib_iconWorks::getSpriteIconForRecord('pages', $page, array('title' => $iconAltText));
+			$elementIcon = \TYPO3\CMS\Backend\Utility\IconUtility::getSpriteIconForRecord('pages', $page, array('title' => $iconAltText));
 
 				// Return item with link to Web > List
 			$editOnClick = "top.goToModule('web_list', '', '&id=" . $uid . "')";

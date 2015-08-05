@@ -31,7 +31,7 @@
  * @package	TYPO3
  * @subpackage	tx_externalimport
  */
-class tx_externalimport_transformations implements t3lib_Singleton {
+class tx_externalimport_transformations implements \TYPO3\CMS\Core\SingletonInterface {
 
 	/**
 	 * This an example method to be called by external import for transforming data

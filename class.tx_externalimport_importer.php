@@ -65,13 +65,13 @@ class tx_externalimport_importer {
 	 */
 	public function __construct() {
 		$this->extConf = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf'][$this->extKey]);
-		$this->messages = array(t3lib_FlashMessage::ERROR => array(), t3lib_FlashMessage::WARNING => array(), t3lib_FlashMessage::OK => array());
+		$this->messages = array(\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR => array(), \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING => array(), \TYPO3\CMS\Core\Messaging\FlashMessage::OK => array());
 
 			// Make sure we have a language object
 			// If initialised, use existing, if not, initialise it
 		if (!isset($GLOBALS['LANG'])) {
 			require_once(PATH_typo3 . 'sysext/lang/lang.php');
-			$GLOBALS['LANG'] = t3lib_div::makeInstance('language');
+			$GLOBALS['LANG'] = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('language');
 			$GLOBALS['LANG']->init($GLOBALS['BE_USER']->uc['lang']);
 		}
 		$GLOBALS['LANG']->includeLLFile('EXT:' . $this->extKey . '/locallang.xml');
@@ -80,7 +80,7 @@ class tx_externalimport_importer {
 		if (isset($this->extConf['timelimit']) && ($this->extConf['timelimit'] > -1)) {
 			set_time_limit($this->extConf['timelimit']);
 			if ($this->extConf['debug'] || TYPO3_DLOG) {
-				t3lib_div::devLog($GLOBALS['LANG']->getLL('timelimit'), $this->extKey, 0, $this->extConf['timelimit']);
+				\TYPO3\CMS\Core\Utility\GeneralUtility::devLog($GLOBALS['LANG']->getLL('timelimit'), $this->extKey, 0, $this->extConf['timelimit']);
 			}
 		}
 	}
@@ -114,14 +114,14 @@ class tx_externalimport_importer {
 			// Sort tables by priority (lower number is highest priority)
 		ksort($externalTables);
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog($GLOBALS['LANG']->getLL('sync_all'), $this->extKey, 0, $externalTables);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog($GLOBALS['LANG']->getLL('sync_all'), $this->extKey, 0, $externalTables);
 		}
 
 			// Synchronise all tables
 		$allMessages = array();
 		foreach ($externalTables as $tables) {
 			foreach ($tables as $tableData) {
-				$this->messages = array(t3lib_FlashMessage::ERROR => array(), t3lib_FlashMessage::WARNING => array(), t3lib_FlashMessage::OK => array()); // Reset error messages array
+				$this->messages = array(\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR => array(), \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING => array(), \TYPO3\CMS\Core\Messaging\FlashMessage::OK => array()); // Reset error messages array
 				$messages = $this->synchronizeData($tableData['table'], $tableData['index']);
 				$key = $tableData['table'] . '/' .$tableData['index'];
 				$allMessages[$key] = $messages;
@@ -142,7 +142,7 @@ class tx_externalimport_importer {
 	protected function initTCAData($table, $index) {
 		$this->table = $table;
 		$this->index = $index;
-		t3lib_div::loadTCA($this->table);
+		\TYPO3\CMS\Core\Utility\GeneralUtility::loadTCA($this->table);
 		$this->tableTCA = $GLOBALS['TCA'][$this->table];
 		$this->externalConfig = $GLOBALS['TCA'][$this->table]['ctrl']['external'][$index];
 		// Set the pid where the records will be stored
@@ -165,7 +165,7 @@ class tx_externalimport_importer {
 		// Additional fields are fields that must be taken from the imported data,
 		// but that will not be saved into the database
 		if (!empty($this->externalConfig['additional_fields'])) {
-			$this->additionalFields = t3lib_div::trimExplode(',', $this->externalConfig['additional_fields'], 1);
+			$this->additionalFields = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->externalConfig['additional_fields'], 1);
 			$this->numAdditionalFields = count($this->additionalFields);
 		}
 	}
@@ -189,7 +189,7 @@ class tx_externalimport_importer {
 					$GLOBALS['LANG']->getLL('no_connector')
 				);
 			} else {
-				$services = t3lib_extMgm::findService('connector', $this->externalConfig['connector']);
+				$services = \TYPO3\CMS\Core\Utility\ExtensionManagementUtility::findService('connector', $this->externalConfig['connector']);
 
 					// The service is not available
 				if ($services === FALSE) {
@@ -198,7 +198,7 @@ class tx_externalimport_importer {
 					);
 				} else {
 						/** @var $connector tx_svconnector_base */
-					$connector = t3lib_div::makeInstanceService('connector', $this->externalConfig['connector']);
+					$connector = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstanceService('connector', $this->externalConfig['connector']);
 
 						// The service was instantiated, but an error occurred while initiating the connection
 						// If the returned value is an array, an error has occurred
@@ -254,13 +254,13 @@ class tx_externalimport_importer {
 						if (!$abortImportProcess) {
 							if ($this->extConf['debug'] || TYPO3_DLOG) {
 								$debugData = $this->prepareDataSample($data);
-								t3lib_div::devLog('Data received (sample)', $this->extKey, -1, $debugData);
+								\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('Data received (sample)', $this->extKey, -1, $debugData);
 							}
 							$this->handleData($data);
 						}
 							// Call connector's post-processing with a rough error status
 						$errorStatus = FALSE;
-						if (count($this->messages[t3lib_FlashMessage::ERROR]) > 0) {
+						if (count($this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR]) > 0) {
 							$errorStatus = TRUE;
 						}
 						$connector->postProcessOperations($this->externalConfig['parameters'], $errorStatus);
@@ -294,7 +294,7 @@ class tx_externalimport_importer {
 	protected function processParameters($parameters) {
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['processParameters'])) {
 			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['processParameters'] as $className) {
-				$preProcessor = t3lib_div::getUserObj($className);
+				$preProcessor = \TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 				$parameters = $preProcessor->processParameters($parameters, $this);
 			}
 		}
@@ -374,7 +374,7 @@ class tx_externalimport_importer {
 			// Check for custom data handlers
 		if (!empty($this->externalConfig['dataHandler'])) {
 				/** @var $dataHandler tx_externalimport_dataHandler */
-			$dataHandler = t3lib_div::makeInstance($this->externalConfig['dataHandler']);
+			$dataHandler = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance($this->externalConfig['dataHandler']);
 			if ($dataHandler instanceof tx_externalimport_dataHandler) {
 				$records = $dataHandler->handleData($rawData, $this);
 
@@ -424,7 +424,7 @@ class tx_externalimport_importer {
 
 			// Import was aborted, issue warning message
 		} else {
-			$this->addMessage($GLOBALS['LANG']->getLL('importAborted'), t3lib_FlashMessage::WARNING);
+			$this->addMessage($GLOBALS['LANG']->getLL('importAborted'), \TYPO3\CMS\Core\Messaging\FlashMessage::WARNING);
 		}
 	}
 
@@ -682,11 +682,11 @@ class tx_externalimport_importer {
 				// Apply defined user function
 			if (isset($columnData['external'][$this->columnIndex]['userFunc'])) {
 					// Try to get the referenced class
-				$userObject = t3lib_div::getUserObj($columnData['external'][$this->columnIndex]['userFunc']['class']);
+				$userObject = \TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($columnData['external'][$this->columnIndex]['userFunc']['class']);
 					// Could not instantiate the class, log error and do nothing
 				if ($userObject === FALSE) {
 					if ($this->extConf['debug'] || TYPO3_DLOG) {
-						t3lib_div::devLog(
+						\TYPO3\CMS\Core\Utility\GeneralUtility::devLog(
 							sprintf(
 								$GLOBALS['LANG']->getLL('invalid_userfunc'),
 								$columnData['external'][$this->columnIndex]['userFunc']['class']
@@ -740,7 +740,7 @@ class tx_externalimport_importer {
 				} else {
 					// The external field may contain multiple values
 					if (!empty($mappingInformation['multipleValuesSeparator'])) {
-						$singleExternalValues = t3lib_div::trimExplode(
+						$singleExternalValues = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(
 							$mappingInformation['multipleValuesSeparator'],
 							$externalValue,
 							TRUE
@@ -794,7 +794,7 @@ class tx_externalimport_importer {
 					$externalValue = $records[$i][$columnName];
 					// The external field may contain multiple values
 					if (!empty($mappingInformation['multipleValuesSeparator'])) {
-						$singleExternalValues = t3lib_div::trimExplode(
+						$singleExternalValues = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(
 							$mappingInformation['multipleValuesSeparator'],
 							$externalValue,
 							TRUE
@@ -870,7 +870,7 @@ class tx_externalimport_importer {
 	protected function preprocessRawData($records) {
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['preprocessRawRecordset'])) {
 			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['preprocessRawRecordset'] as $className) {
-				$preProcessor = &t3lib_div::getUserObj($className);
+				$preProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 				$records = $preProcessor->preprocessRawRecordset($records, $this);
 				// Compact the array again, in case some values were unset in the pre-processor
 				$records = array_values($records);
@@ -905,7 +905,7 @@ class tx_externalimport_importer {
 		if ($continueImport) {
 			if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['validateRawRecordset'])) {
 				foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['validateRawRecordset'] as $className) {
-					$validator = &t3lib_div::getUserObj($className);
+					$validator = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 					$continueImport = $validator->validateRawRecordset($records, $this);
 						// If a single check fails, don't call further hooks
 					if (!$continueImport) {
@@ -929,7 +929,7 @@ class tx_externalimport_importer {
 	protected function preprocessData($records) {
 		if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['preprocessRecordset'])) {
 			foreach($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['preprocessRecordset'] as $className) {
-				$preProcessor = &t3lib_div::getUserObj($className);
+				$preProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 				$records = $preProcessor->preprocessRecordset($records, $this);
 				// Compact the array again, in case some values were unset in the pre-processor
 				$records = array_values($records);
@@ -947,7 +947,7 @@ class tx_externalimport_importer {
 	 */
 	protected function storeData($records) {
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog('Data received for storage', $this->extKey, 0, $records);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('Data received for storage', $this->extKey, 0, $records);
 		}
 
 			// Initialize some variables
@@ -977,10 +977,10 @@ class tx_externalimport_importer {
 				// Check if some fields are excluded from some operations
 				// and add them to the relevant list
 			if (isset($columnData['external'][$this->columnIndex]['disabledOperations'])) {
-				if (t3lib_div::inList($columnData['external'][$this->columnIndex]['disabledOperations'], 'insert')) {
+				if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList($columnData['external'][$this->columnIndex]['disabledOperations'], 'insert')) {
 					$fieldsExcludedFromInserts[] = $columnName;
 				}
-				if (t3lib_div::inList($columnData['external'][$this->columnIndex]['disabledOperations'], 'update')) {
+				if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList($columnData['external'][$this->columnIndex]['disabledOperations'], 'update')) {
 					$fieldsExcludedFromUpdates[] = $columnName;
 				}
 			}
@@ -990,11 +990,11 @@ class tx_externalimport_importer {
 			if (isset($columnData['external'][$this->columnIndex]['excludedOperations'])) {
 				$deprecationMessage = 'Property "excludedOperations" has been deprecated. Please use "disabledOperations" instead.';
 				$deprecationMessage .= LF . 'Support for "excludedOperations" will be removed in external_import version 3.0.';
-				t3lib_div::deprecationLog($deprecationMessage);
-				if (t3lib_div::inList($columnData['external'][$this->columnIndex]['excludedOperations'], 'insert')) {
+				\TYPO3\CMS\Core\Utility\GeneralUtility::deprecationLog($deprecationMessage);
+				if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList($columnData['external'][$this->columnIndex]['excludedOperations'], 'insert')) {
 					$fieldsExcludedFromInserts[] = $columnName;
 				}
-				if (t3lib_div::inList($columnData['external'][$this->columnIndex]['excludedOperations'], 'update')) {
+				if (\TYPO3\CMS\Core\Utility\GeneralUtility::inList($columnData['external'][$this->columnIndex]['excludedOperations'], 'update')) {
 					$fieldsExcludedFromUpdates[] = $columnName;
 				}
 			}
@@ -1014,7 +1014,7 @@ class tx_externalimport_importer {
 				if (isset($mmData['mappings']['uid_foreign'])) {
 					$deprecationMessage = 'Property "mappings.uid_foreign" has been deprecated. Please use "mapping" instead.';
 					$deprecationMessage .= LF . 'Support for "mappings.uid_foreign" will be removed in external_import version 3.0.';
-					t3lib_div::deprecationLog($deprecationMessage);
+					\TYPO3\CMS\Core\Utility\GeneralUtility::deprecationLog($deprecationMessage);
 					$mappingInformation = $mmData['mappings']['uid_foreign'];
 				} else {
 					$mappingInformation = $mmData['mapping'];
@@ -1146,11 +1146,11 @@ class tx_externalimport_importer {
 			$theID = '';
 			// Reference uid is found, perform an update (if not disabled)
 			if (isset($existingUids[$externalUid])) {
-				if (!t3lib_div::inList($this->externalConfig['disabledOperations'], 'update')) {
+				if (!\TYPO3\CMS\Core\Utility\GeneralUtility::inList($this->externalConfig['disabledOperations'], 'update')) {
 					// First call a pre-processing hook
 					if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['updatePreProcess'])) {
 						foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['updatePreProcess'] as $className) {
-							$preProcessor = &t3lib_div::getUserObj($className);
+							$preProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 							$theRecord = $preProcessor->processBeforeUpdate($theRecord, $this);
 						}
 					}
@@ -1169,12 +1169,12 @@ class tx_externalimport_importer {
 				}
 
 				// Reference uid not found, perform an insert (if not disabled)
-			} elseif (!t3lib_div::inList($this->externalConfig['disabledOperations'], 'insert')) {
+			} elseif (!\TYPO3\CMS\Core\Utility\GeneralUtility::inList($this->externalConfig['disabledOperations'], 'insert')) {
 
 					// First call a pre-processing hook
 				if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['insertPreProcess'])) {
 					foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['insertPreProcess'] as $className) {
-						$preProcessor = &t3lib_div::getUserObj($className);
+						$preProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 						$theRecord = $preProcessor->processBeforeInsert($theRecord, $this);
 					}
 				}
@@ -1208,11 +1208,11 @@ class tx_externalimport_importer {
 			}
 		}
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog('TCEmain data', $this->extKey, 0, $tceData);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('TCEmain data', $this->extKey, 0, $tceData);
 		}
 		// Create an instance of TCEmain and process the data
-		/** @var $tce t3lib_TCEmain */
-		$tce = t3lib_div::makeInstance('t3lib_TCEmain');
+		/** @var $tce \TYPO3\CMS\Core\DataHandling\DataHandler */
+		$tce = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\DataHandling\\DataHandler');
 		$tce->stripslashes_values = 0;
 		// Check if TCEmain logging should be turned on or off
 		$disableLogging = (empty($this->extConf['disableLog'])) ? FALSE : TRUE;
@@ -1230,7 +1230,7 @@ class tx_externalimport_importer {
 		$tce->start($tceData, array());
 		$tce->process_datamap();
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog('New IDs', 'external_import', 0, $tce->substNEWwithIDs);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('New IDs', 'external_import', 0, $tce->substNEWwithIDs);
 		}
 		// Store the number of new IDs created. This is used in error reporting later
 		$numberOfNewIDs = count($tce->substNEWwithIDs);
@@ -1259,7 +1259,7 @@ class tx_externalimport_importer {
 				}
 			}
 			foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['datamapPostProcess'] as $className) {
-				$postProcessor = &t3lib_div::getUserObj($className);
+				$postProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 				$postProcessor->datamapPostProcess($this->table, $savedData, $this);
 			}
 		}
@@ -1270,7 +1270,7 @@ class tx_externalimport_importer {
 		// Mark as deleted records with existing uids that were not in the import data anymore
 		// (if automatic delete is activated)
 		if (
-			t3lib_div::inList($this->externalConfig['disabledOperations'], 'delete')
+			\TYPO3\CMS\Core\Utility\GeneralUtility::inList($this->externalConfig['disabledOperations'], 'delete')
 			|| (
 				isset($this->externalConfig['deleteNonSynchedRecords'])
 				&& $this->externalConfig['deleteNonSynchedRecords'] === FALSE
@@ -1282,7 +1282,7 @@ class tx_externalimport_importer {
 				// Call a pre-processing hook
 			if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['deletePreProcess'])) {
 				foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['deletePreProcess'] as $className) {
-					$preProcessor = &t3lib_div::getUserObj($className);
+					$preProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 					$absentUids = $preProcessor->processBeforeDelete($this->table, $absentUids, $this);
 				}
 			}
@@ -1292,13 +1292,13 @@ class tx_externalimport_importer {
 				foreach ($absentUids as $id) {
 					$tceCommands[$this->table][$id] = array('delete' => 1);
 				}
-				if ($this->extConf['debug'] || TYPO3_DLOG) t3lib_div::devLog('TCEmain commands', $this->extKey, 0, $tceCommands);
+				if ($this->extConf['debug'] || TYPO3_DLOG) \TYPO3\CMS\Core\Utility\GeneralUtility::devLog('TCEmain commands', $this->extKey, 0, $tceCommands);
 				$tce->start(array(), $tceCommands);
 				$tce->process_cmdmap();
 					// Call a post-processing hook
 				if (is_array($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['cmdmapPostProcess'])) {
 					foreach ($GLOBALS['TYPO3_CONF_VARS']['EXTCONF'][$this->extKey]['cmdmapPostProcess'] as $className) {
-						$postProcessor = &t3lib_div::getUserObj($className);
+						$postProcessor = &\TYPO3\CMS\Core\Utility\GeneralUtility::getUserObj($className);
 						$absentUids = $postProcessor->cmdmapPostProcess($this->table, $absentUids, $this);
 					}
 				}
@@ -1330,9 +1330,9 @@ class tx_externalimport_importer {
 						$data = unserialize($row['log_data']);
 						$message = sprintf($label, htmlspecialchars($data[0]), htmlspecialchars($data[1]), htmlspecialchars($data[2]), htmlspecialchars($data[3]), htmlspecialchars($data[4]));
 					}
-					$this->messages[t3lib_FlashMessage::ERROR][] = $message;
+					$this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR][] = $message;
 					if ($this->extConf['debug'] || TYPO3_DLOG) {
-						t3lib_div::devLog($message, $this->extKey, 3);
+						\TYPO3\CMS\Core\Utility\GeneralUtility::devLog($message, $this->extKey, 3);
 					}
 				}
 				$GLOBALS['TYPO3_DB']->sql_free_result($res);
@@ -1341,16 +1341,16 @@ class tx_externalimport_importer {
 				// to get a realistic number of new records
 			$inserts = $this->newKeysCounter + ($numberOfNewIDs - $this->newKeysCounter);
 				// Add a warning that numbers reported (below) may not be accurate
-			$this->messages[t3lib_FlashMessage::WARNING][] = $GLOBALS['LANG']->getLL('things_happened');
+			$this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::WARNING][] = $GLOBALS['LANG']->getLL('things_happened');
 		} else {
 			$inserts = $numberOfNewIDs;
 		}
 		unset($tce);
 
 			// Set informational messages
-		$this->messages[t3lib_FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_inserted'), $inserts);
-		$this->messages[t3lib_FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_updated'), $updates);
-		$this->messages[t3lib_FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_deleted'), $deletes);
+		$this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_inserted'), $inserts);
+		$this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_updated'), $updates);
+		$this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::OK][] = sprintf($GLOBALS['LANG']->getLL('records_deleted'), $deletes);
 	}
 
 	/**
@@ -1363,7 +1363,7 @@ class tx_externalimport_importer {
 	 */
 	protected function postProcessMmRelations($fullMappings) {
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog('Handling full mappings', $this->extKey, 0, $fullMappings);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog('Handling full mappings', $this->extKey, 0, $fullMappings);
 		}
 
 		// Refresh list of existing primary keys now that new records have been inserted
@@ -1444,11 +1444,11 @@ class tx_externalimport_importer {
 	protected function clearCache() {
 		if (!empty($this->externalConfig['clearCache'])) {
 				// Extract the list of pages for which to clear the cache
-			$pages = t3lib_div::trimExplode(',', $this->externalConfig['clearCache'], TRUE);
+			$pages = \TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', $this->externalConfig['clearCache'], TRUE);
 				// Use TCEmain to clear the cache of individual pages
 			if (count($pages) > 0) {
-					/** @var $tce t3lib_TCEmain */
-				$tce = t3lib_div::makeInstance('t3lib_TCEmain');
+					/** @var $tce \TYPO3\CMS\Core\DataHandling\DataHandler */
+				$tce = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\DataHandling\\DataHandler');
 				$tce->start(array(), array());
 				foreach ($pages as $pageId) {
 					$tce->clear_cacheCmd(intval($pageId));
@@ -1472,7 +1472,7 @@ class tx_externalimport_importer {
 		if (!empty($this->externalConfig['where_clause'])) {
 			$where .= ' AND ' . $this->externalConfig['where_clause'];
 		}
-		$where .= t3lib_BEfunc::deleteClause($this->table);
+		$where .= \TYPO3\CMS\Backend\Utility\BackendUtility::deleteClause($this->table);
 		$referenceUidField = $this->externalConfig['reference_uid'];
 		$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($referenceUidField . ',uid', $this->table, $where);
 		if ($res) {
@@ -1521,7 +1521,7 @@ class tx_externalimport_importer {
 					$whereClause = $mappingData['where_clause'];
 				}
 			}
-			$whereClause .= t3lib_BEfunc::deleteClause($mappingData['table']);
+			$whereClause .= \TYPO3\CMS\Backend\Utility\BackendUtility::deleteClause($mappingData['table']);
 				// Query the table
 			$res = $GLOBALS['TYPO3_DB']->exec_SELECTquery($fields, $mappingData['table'], $whereClause);
 
@@ -1549,13 +1549,13 @@ class tx_externalimport_importer {
 		$severity = -1;
 
 			// Define severity based on types of messages
-		if (count($this->messages[t3lib_FlashMessage::ERROR]) > 0) {
+		if (count($this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR]) > 0) {
 			$severity = 3;
-		} elseif (count($this->messages[t3lib_FlashMessage::WARNING]) > 0) {
+		} elseif (count($this->messages[\TYPO3\CMS\Core\Messaging\FlashMessage::WARNING]) > 0) {
 			$severity = 2;
 		}
 		if ($this->extConf['debug'] || TYPO3_DLOG) {
-			t3lib_div::devLog(sprintf($GLOBALS['LANG']->getLL('sync_table'), $this->table), $this->extKey, $severity, $this->messages);
+			\TYPO3\CMS\Core\Utility\GeneralUtility::devLog(sprintf($GLOBALS['LANG']->getLL('sync_table'), $this->table), $this->extKey, $severity, $this->messages);
 		}
 	}
 
@@ -1639,7 +1639,7 @@ class tx_externalimport_importer {
 	 * @param integer $status Status of the message. Expected is "success", "warning" or "error"
 	 * @return void
 	 */
-	public function addMessage($text, $status = t3lib_FlashMessage::ERROR) {
+	public function addMessage($text, $status = \TYPO3\CMS\Core\Messaging\FlashMessage::ERROR) {
 		if (!empty($text)) {
 			$this->messages[$status][] = $text;
 		}
@@ -1708,8 +1708,8 @@ class tx_externalimport_importer {
 			// Proceed with sending the mail
 		} else {
 				// Instantiate and initialize the mail object
-				/** @var $mailObject t3lib_mail_Message */
-			$mailObject = t3lib_div::makeInstance('t3lib_mail_Message');
+				/** @var $mailObject \TYPO3\CMS\Core\Mail\MailMessage */
+			$mailObject = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance('TYPO3\\CMS\\Core\\Mail\\MailMessage');
 			try {
 				$sender = array(
 					$senderMail => $senderName
