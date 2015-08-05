@@ -1,0 +1,11 @@
+{
+  "name": "fsuter/external-import",
+  "type": "typo3-cms-extension",
+  "description": "",
+  "homepage": "",
+  "license": ["GPL-2.0+"],
+  "require": {
+    "typo3/cms": ">=6.2.0"
+  }
+}
+
