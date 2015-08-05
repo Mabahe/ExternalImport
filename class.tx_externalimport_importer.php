@@ -142,7 +142,7 @@ class tx_externalimport_importer {
 	protected function initTCAData($table, $index) {
 		$this->table = $table;
 		$this->index = $index;
-		\TYPO3\CMS\Core\Utility\GeneralUtility::loadTCA($this->table);
+
 		$this->tableTCA = $GLOBALS['TCA'][$this->table];
 		$this->externalConfig = $GLOBALS['TCA'][$this->table]['ctrl']['external'][$index];
 		// Set the pid where the records will be stored

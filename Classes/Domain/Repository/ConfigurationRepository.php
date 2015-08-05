@@ -61,7 +61,6 @@ class Tx_ExternalImport_Domain_Repository_ConfigurationRepository {
 	 * @return array The relevant TCA configuration
 	 */
 	public function findColumnsByTableAndIndex($table, $index) {
-		\TYPO3\CMS\Core\Utility\GeneralUtility::loadTCA($table);
 		if (isset($GLOBALS['TCA'][$table]['columns'])) {
 			$columns = array();
 			$columnsConfiguration = $GLOBALS['TCA'][$table]['columns'];
