@@ -122,7 +122,7 @@ class Tx_ExternalImport_ExtDirect_Server {
 				catch (Exception $e) {
 						/** @var $flashMessage \TYPO3\CMS\Core\Messaging\FlashMessage */
 					$flashMessage = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(
-						'\TYPO3\CMS\Core\Messaging\FlashMessage',
+						'TYPO3\\CMS\\Core\\Messaging\\FlashMessage',
 						$e->getMessage(),
 						'',
 						\TYPO3\CMS\Core\Messaging\FlashMessage::ERROR
