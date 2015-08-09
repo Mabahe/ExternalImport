@@ -39,25 +39,24 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends \TYPO3\CMS\Fl
 	/**
 	 * Render start page with template.php and pageTitle
 	 *
-	 * @param string  $pageTitle title tag of the module. Not required by default, as BE modules are shown in a frame
-	 * @param boolean $enableJumpToUrl If TRUE, includes "jumpTpUrl" javascript function required by ActionMenu. Defaults to TRUE
-	 * @param boolean $enableClickMenu If TRUE, loads clickmenu.js required by BE context menus. Defaults to TRUE
-	 * @param boolean $loadPrototype specifies whether to load prototype library. Defaults to TRUE
-	 * @param boolean $loadScriptaculous specifies whether to load scriptaculous libraries. Defaults to FALSE
-	 * @param string  $scriptaculousModule additional modules for scriptaculous
-	 * @param boolean $loadExtJs specifies whether to load ExtJS library. Defaults to FALSE
-	 * @param boolean $loadExtJsTheme whether to load ExtJS "grey" theme. Defaults to FALSE
-	 * @param string  $extJsAdapter load alternative adapter (ext-base is default adapter)
-	 * @param boolean $enableExtJsDebug if TRUE, debug version of ExtJS is loaded. Use this for development only
-	 * @param string $addCssFile Custom CSS file to be loaded
-	 * @param string $addJsFile Custom JavaScript file to be loaded
+	 * @param string $pageTitle title tag of the module. Not required by default, as BE modules are shown in a frame
+	 * @param bool $enableClickMenu If TRUE, loads clickmenu.js required by BE context menus. Defaults to TRUE
+	 * @param bool $loadExtJs specifies whether to load ExtJS library. Defaults to FALSE
+	 * @param bool $loadExtJsTheme whether to load ExtJS "grey" theme. Defaults to FALSE
+	 * @param bool $enableExtJsDebug if TRUE, debug version of ExtJS is loaded. Use this for development only
+	 * @param bool $loadJQuery whether to load jQuery library. Defaults to FALSE
+	 * @param array $includeCssFiles List of custom CSS file to be loaded
+	 * @param array $includeJsFiles List of custom JavaScript file to be loaded
+	 * @param array $addJsInlineLabels Custom labels to add to JavaScript inline labels
+	 * @param bool $includeCsh flag for including CSH
+	 * @param array $includeRequireJsModules List of RequireJS modules to be loaded
 	 * @param string $globalWriteAccess Whether uses has full access ("all"), "partial" access or none (to sync tables)
 	 * @param string $view Name of the current view ("sync" or "nosync")
 	 * @return string
 	 * @see template
 	 * @see \TYPO3\CMS\Core\Page\PageRenderer
 	 */
-	public function render($pageTitle = '', $enableJumpToUrl = TRUE, $enableClickMenu = TRUE, $loadPrototype = TRUE, $loadScriptaculous = FALSE, $scriptaculousModule = '', $loadExtJs = FALSE, $loadExtJsTheme = TRUE, $extJsAdapter = '', $enableExtJsDebug = FALSE, $addCssFile = NULL, $addJsFile = NULL, $globalWriteAccess = 'none', $view = 'sync') {
+	public function render($pageTitle = '', $enableClickMenu = TRUE, $loadExtJs = FALSE, $loadExtJsTheme = TRUE, $enableExtJsDebug = FALSE, $loadJQuery = FALSE, $includeCssFiles = NULL, $includeJsFiles = NULL, $addJsInlineLabels = NULL, $includeCsh = TRUE, $includeRequireJsModules = NULL, $globalWriteAccess = 'none', $view = 'sync') {
 		$extensionConfiguration = unserialize($GLOBALS['TYPO3_CONF_VARS']['EXT']['extConf']['external_import']);
 
 		$doc = $this->getDocInstance();
@@ -68,7 +67,7 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends \TYPO3\CMS\Fl
 		$pageRenderer->addExtDirectCode(array('TYPO3.ExternalImport'));
 		// Load the FitToParent ExtJS plugin
 		if ($isTypo3Version62OrMore) {
-			$uxPath = $doc->backPath . '../typo3/js/extjs/ux/';
+			$uxPath = $doc->backPath . '../typo3/sysext/backend/Resources/Public/JavaScript/extjs/ux/';
 		} else {
 			$uxPath = $doc->backPath . '../t3lib/js/extjs/ux/';
 		}
@@ -107,17 +106,16 @@ class Tx_ExternalImport_ViewHelpers_Be_ContainerViewHelper extends \TYPO3\CMS\Fl
 
 		$output = parent::render(
 			$pageTitle,
-			$enableJumpToUrl,
 			$enableClickMenu,
-			$loadPrototype,
-			$loadScriptaculous,
-			$scriptaculousModule,
 			$loadExtJs,
 			$loadExtJsTheme,
-			$extJsAdapter,
 			$enableExtJsDebug,
-			$addCssFile,
-			$addJsFile
+			$loadJQuery,
+			$includeCssFiles,
+			$includeJsFiles,
+			$addJsInlineLabels,
+			$includeCsh,
+			$includeRequireJsModules
 		);
 		return $output;
 	}
